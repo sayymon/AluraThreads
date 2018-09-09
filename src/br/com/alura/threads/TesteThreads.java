@@ -1,10 +1,16 @@
-package br.com.alura.threads1;
+package br.com.alura.threads;
 
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 /**
  * Thread e processamento em paralelo implementações de Thread e exemplos curso de threads 1
  * Thread thread = new Thread(runnable);
@@ -25,7 +31,7 @@ import java.util.Vector;
  */
 public class TesteThreads {
 
-	public static void main(String[] args) throws InterruptedException {
+	public static void main(String[] args) throws Exception {
 		List<String> listaNoThreadSafe = new ArrayList<String>();
 		
 		for (int i = 1; i <= 10; i++) {
@@ -62,7 +68,7 @@ public class TesteThreads {
 		
 		
 		for (int i = 1; i <= 10; i++) {
-			new Thread(new Runnable() {
+			Thread thread = new Thread(new Runnable() {
 				
 				@Override
 				public void run() {
@@ -71,7 +77,9 @@ public class TesteThreads {
 						listaThreadSafe2Opcao.add("Thread " + this + " - " + j);
 					}
 				}
-			}).start();
+			});
+			thread.setUncaughtExceptionHandler(tratadorExcecoesThreads());
+			thread.start();
 		}
 		
 		pegandoTodasAsThreads();
@@ -81,7 +89,48 @@ public class TesteThreads {
 			System.out.println(i+" - listaThreadSafe2Opcao :"+listaThreadSafe2Opcao.get(i));			
 		}
 		
+		/**
+		 * Implementacao que veio a partir do java 5 para melhorar a utilizacao das threads retornar 
+		 * referencias e excecoes de forma mais nativa
+		 */
+		Callable<String> callable = new Callable<String>() {
+
+			@Override
+			public String call() throws Exception {
+				return "Exemplo de callable";
+			}
+			
+		};
+		/**
+		 * Exemplo FutureTask
+		 */
+		FutureTask<String> futureTask = new FutureTask<>(callable);
+		
+		
+		new Thread(futureTask).start();
+		
+		/**
+		 * Aguarda 10 segundos caso o future nao retorne antes do tempo limite
+		 */
+		futureTask.get(10, TimeUnit.SECONDS);
+		
 		quantidadeProcessadores();
+	}
+
+	/**
+	 * Exemplo de tratador de excecoes das threads nao tratadas
+	 * 
+	 * @return
+	 */
+	private static UncaughtExceptionHandler tratadorExcecoesThreads() {
+		return new UncaughtExceptionHandler() {
+			
+			@Override
+			public void uncaughtException(Thread t, Throwable e) {
+				System.out.println(t.getName() +" excessao :"+e.getMessage());
+				
+			}
+		};
 	}
 	
 	public static void pegandoTodasAsThreads(){

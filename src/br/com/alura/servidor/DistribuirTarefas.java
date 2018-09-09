@@ -27,6 +27,15 @@ public class DistribuirTarefas implements Runnable {
 				printStream.println("Recebi a mensagem ;"+mensagemCliente);
 				if (mensagemCliente.equals("fim")) {
 					servidorTarefas.parar();
+				}else {
+					servidorTarefas.getThreadPool().execute(() -> {
+						System.out.println("Executando Comando :"+mensagemCliente);
+						try {
+							Thread.sleep(2000L);
+						} catch (InterruptedException e) {
+							System.err.println(e);
+						}
+					});
 				}
 			}
 			

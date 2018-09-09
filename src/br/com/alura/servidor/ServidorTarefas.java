@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 public class ServidorTarefas {
 
@@ -33,7 +34,8 @@ public class ServidorTarefas {
 		/**
 		 * Implementacao que disponibiliza o reaproveitamento das threads
 		 */
-		this.threadPool = Executors.newCachedThreadPool();
+		ThreadFactory factory = Executors.privilegedThreadFactory();
+		this.threadPool = Executors.newCachedThreadPool(factory);
 		this.isRodando = true;
 	}
 	
@@ -65,5 +67,10 @@ public class ServidorTarefas {
 		servidor.close();
 		threadPool.shutdown();
 	}
+
+	public ExecutorService getThreadPool() {
+		return threadPool;
+	}
+	 
 
 }
